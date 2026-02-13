@@ -1,0 +1,11 @@
+{
+  "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
+  "tasks": { "wasmbuild": "deno run -A jsr:@deno/wasmbuild@0.21.0" },
+  "lint": {
+    "include": ["**/*.ts", "**/*.tsx"],
+    "exclude": ["target"],
+    "rules": {
+      "tags": ["recommended"]
+    }
+  }
+}

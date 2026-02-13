@@ -1,0 +1,79 @@
+name: wasm-ci-release
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run tests
+        run: cargo test --workspace
+
+  wasmbuild:
+    name: Build WASM artifacts
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Setup Rust (wasm target)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Build wasm package
+        run: deno task wasmbuild
+
+      - name: Organize release files
+        run: |
+          test -d lib
+          mkdir -p release-assets
+          cp -v lib/* release-assets/
+
+      - name: Upload CI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-lib
+          path: release-assets/*
+          if-no-files-found: error
+
+  release:
+    name: Publish Release assets
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: wasmbuild
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download built files
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-lib
+          path: release-assets
+
+      - name: Upload assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
+          overwrite_files: true
