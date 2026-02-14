@@ -23,6 +23,12 @@ Implement a Rust-first binary inspection core in `crates/bininspect` that produc
   - ELF
   - PE
   - WASM
+- Unknown/fuzzy fallback:
+  - If top-level magic is unknown, run dedicated ECU detection for raw tuning dumps
+  - Supported manufacturer detection priority: BMW, then Ford, then VW, then Mercedes
+  - Build deterministic ECU-oriented section map (padding/code/calibration/ascii/blob)
+  - Extract ECU family and calibration ID symbols from embedded tokens
+  - Panic with console error when unknown input is not recognized as a supported ECU binary
 - Parse core fields for each format:
   - headers needed for arch/entrypoint/debug-strip hints
   - sections/segments with offsets/sizes/flags

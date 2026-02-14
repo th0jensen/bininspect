@@ -120,6 +120,48 @@ mod tests {
         assert_eq!(detect_format(&pe), DetectedFormat::Pe);
     }
 
+    #[test]
+    fn parses_bmw_ecu_unknown_binary() {
+        let mut unknown = vec![0xFFu8; 64 * 1024];
+        let marker = b"BMW DME MEVD17 SWFL 1037502345 calibration";
+        unknown[..marker.len()].copy_from_slice(marker);
+        let report =
+            analyze_bytes(&unknown).expect("BMW-style unknown input should be parsed as ECU");
+
+        assert_eq!(report.binary.format, BinaryFormat::Unknown);
+        assert!(!report.sections.is_empty());
+        assert!(
+            report
+                .symbols
+                .iter()
+                .any(|sym| sym.name.contains("oem:bmw"))
+        );
+    }
+
+    #[test]
+    fn manufacturer_priority_prefers_bmw_then_ford_then_vw_then_mercedes() {
+        let mut unknown = vec![0u8; 96 * 1024];
+        let marker = b"BMW FORD VW MERCEDES ECU SWFL 12345678";
+        unknown[..marker.len()].copy_from_slice(marker);
+        let report = analyze_bytes(&unknown).expect("priority test input should parse");
+
+        assert_eq!(report.binary.format, BinaryFormat::Unknown);
+        assert!(report.binary.arch.contains("oem=bmw"));
+        assert!(
+            report
+                .symbols
+                .iter()
+                .any(|sym| sym.name.contains("oem:bmw"))
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "bininspect safety rail: unknown binary parse failed")]
+    fn panics_when_unknown_binary_parse_fails() {
+        let non_ecu = b"hello world not an ecu dump";
+        let _ = analyze_bytes(non_ecu);
+    }
+
     #[cfg(target_os = "macos")]
     #[test]
     fn analyzes_own_macho_binary() {
