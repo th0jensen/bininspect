@@ -8,7 +8,7 @@ path = "src/lib.rs"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-bininspect = { path = "../bininspect", features = ["ts-types"] }
+bininspect-core = { path = "../bininspect-core", features = ["ts-types"] }
 js-sys = "0.3"
 wasm-bindgen = "=0.2.106"
 

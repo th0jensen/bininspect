@@ -2,11 +2,19 @@
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
 
-export interface Finding {
-  severity: Severity;
-  title: string;
-  details: string;
-  evidence: string[];
+export interface BinaryInfo {
+  format: BinaryFormat;
+  arch: string;
+  entrypoint: number | undefined;
+  is_stripped: boolean;
+  has_debug: boolean;
+  file_size: number;
+  magic: string;
+}
+
+export interface StringInfo {
+  offset: number;
+  value: string;
 }
 
 export interface CodeSignInfo {
@@ -25,36 +33,6 @@ export interface CodeSignInfo {
   mismatch_pages: number[];
 }
 
-export interface StringInfo {
-  offset: number;
-  value: string;
-}
-
-export interface Hashes {
-  sha256: string;
-  sha1: string;
-}
-
-export interface SectionInfo {
-  name: string;
-  addr: number | undefined;
-  offset: number;
-  size: number;
-  flags: string[];
-  entropy: number | undefined;
-}
-
-export interface SymbolInfo {
-  name: string;
-  addr: number | undefined;
-  kind: string;
-}
-
-export interface ImportInfo {
-  library: string | undefined;
-  symbol: string;
-}
-
 export interface AnalysisReport {
   binary: BinaryInfo;
   hashes: Hashes;
@@ -67,23 +45,45 @@ export interface AnalysisReport {
   codesign: CodeSignInfo | undefined;
 }
 
-export interface ExportInfo {
-  symbol: string;
-  addr: number | undefined;
+export interface Finding {
+  severity: Severity;
+  title: string;
+  details: string;
+  evidence: string[];
 }
-
-export type Severity = "info" | "low" | "medium" | "high";
 
 export type BinaryFormat = "mach_o" | "elf" | "pe" | "wasm" | "unknown";
 
-export interface BinaryInfo {
-  format: BinaryFormat;
-  arch: string;
-  entrypoint: number | undefined;
-  is_stripped: boolean;
-  has_debug: boolean;
-  file_size: number;
-  magic: string;
+export type Severity = "info" | "low" | "medium" | "high";
+
+export interface SectionInfo {
+  name: string;
+  addr: number | undefined;
+  offset: number;
+  size: number;
+  flags: string[];
+  entropy: number | undefined;
+}
+
+export interface ImportInfo {
+  library: string | undefined;
+  symbol: string;
+}
+
+export interface SymbolInfo {
+  name: string;
+  addr: number | undefined;
+  kind: string;
+}
+
+export interface Hashes {
+  sha256: string;
+  sha1: string;
+}
+
+export interface ExportInfo {
+  symbol: string;
+  addr: number | undefined;
 }
 
 export function analyze(bytes: Uint8Array): AnalysisReport;

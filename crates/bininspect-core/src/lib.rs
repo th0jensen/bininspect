@@ -13,6 +13,8 @@ pub use model::{
     ImportInfo, SectionInfo, Severity, StringInfo, SymbolInfo,
 };
 
+pub const API_VERSION: &str = env!("CARGO_PKG_VERSION");
+
 pub fn analyze_bytes(bytes: &[u8]) -> Result<AnalysisReport> {
     let mut parsed = parsers::parse(bytes)?;
 
