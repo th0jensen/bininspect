@@ -2,19 +2,30 @@
 // deno-lint-ignore-file
 // deno-fmt-ignore-file
 
-export interface BinaryInfo {
-  format: BinaryFormat;
-  arch: string;
-  entrypoint: number | undefined;
-  is_stripped: boolean;
-  has_debug: boolean;
-  file_size: number;
-  magic: string;
+export interface SectionInfo {
+  name: string;
+  addr: number | undefined;
+  offset: number;
+  size: number;
+  flags: string[];
+  entropy: number | undefined;
 }
 
-export interface StringInfo {
-  offset: number;
-  value: string;
+export interface Hashes {
+  sha256: string;
+  sha1: string;
+}
+
+export interface AnalysisReport {
+  binary: BinaryInfo;
+  hashes: Hashes;
+  sections: SectionInfo[];
+  imports: ImportInfo[];
+  exports: ExportInfo[];
+  symbols: SymbolInfo[];
+  strings: StringInfo[];
+  findings: Finding[];
+  codesign: CodeSignInfo | undefined;
 }
 
 export interface CodeSignInfo {
@@ -33,36 +44,11 @@ export interface CodeSignInfo {
   mismatch_pages: number[];
 }
 
-export interface AnalysisReport {
-  binary: BinaryInfo;
-  hashes: Hashes;
-  sections: SectionInfo[];
-  imports: ImportInfo[];
-  exports: ExportInfo[];
-  symbols: SymbolInfo[];
-  strings: StringInfo[];
-  findings: Finding[];
-  codesign: CodeSignInfo | undefined;
-}
-
-export interface Finding {
-  severity: Severity;
-  title: string;
-  details: string;
-  evidence: string[];
-}
-
 export type BinaryFormat = "mach_o" | "elf" | "pe" | "wasm" | "unknown";
 
-export type Severity = "info" | "low" | "medium" | "high";
-
-export interface SectionInfo {
-  name: string;
-  addr: number | undefined;
+export interface StringInfo {
   offset: number;
-  size: number;
-  flags: string[];
-  entropy: number | undefined;
+  value: string;
 }
 
 export interface ImportInfo {
@@ -76,14 +62,28 @@ export interface SymbolInfo {
   kind: string;
 }
 
-export interface Hashes {
-  sha256: string;
-  sha1: string;
-}
-
 export interface ExportInfo {
   symbol: string;
   addr: number | undefined;
+}
+
+export type Severity = "info" | "low" | "medium" | "high";
+
+export interface BinaryInfo {
+  format: BinaryFormat;
+  arch: string;
+  entrypoint: number | undefined;
+  is_stripped: boolean;
+  has_debug: boolean;
+  file_size: number;
+  magic: string;
+}
+
+export interface Finding {
+  severity: Severity;
+  title: string;
+  details: string;
+  evidence: string[];
 }
 
 export function analyze(bytes: Uint8Array): AnalysisReport;
